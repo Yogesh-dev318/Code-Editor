@@ -1,20 +1,64 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import { Button } from './components/ui/button'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuthStore } from './store/useAuthStore';
+import { Login, Signup } from './pages/Auth';
+import { Dashboard } from './pages/Dashboard';
+import { EditorPage } from './pages/Editor';
+import { Home } from './pages/Home';
 
-function App() {
-  const [count, setCount] = useState(0)
+// Wrapper for pages that require login
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+    const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+    return isAuthenticated ? children : <Navigate to="/login" />;
+};
 
-  return (
-    <>
-     hello world
-     <div className="flex min-h-svh flex-col items-center justify-center">
-      <Button>Click me</Button>
-    </div>
-    </>
-  )
+// Wrapper for pages that should NOT be accessible if already logged in
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+    const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+    return isAuthenticated ? <Navigate to="/dashboard" /> : children;
+};
+
+export default function App() {
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                
+                {/* Wrap Login & Signup with PublicRoute */}
+                <Route 
+                    path="/login" 
+                    element={
+                        <PublicRoute>
+                            <Login />
+                        </PublicRoute>
+                    } 
+                />
+                <Route 
+                    path="/signup" 
+                    element={
+                        <PublicRoute>
+                            <Signup />
+                        </PublicRoute>
+                    } 
+                />
+                
+                <Route 
+                    path="/dashboard" 
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    } 
+                />
+                
+                <Route 
+                    path="/editor/:id" 
+                    element={
+                        <ProtectedRoute>
+                            <EditorPage />
+                        </ProtectedRoute>
+                    } 
+                />
+            </Routes>
+        </BrowserRouter>
+    );
 }
-
-export default App

@@ -20,7 +20,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/files', require('./routes/fileRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
-
+app.use('/api/run', require('./routes/runRoutes')); 
 // Socket.io
 const io = new Server(server, {
     cors: {

@@ -5,23 +5,34 @@ exports.getAiAssistance = async (req, res) => {
     const { code, prompt, context } = req.body; 
 
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        // ---------------------------------------------------------
+        // FIX: Use 'gemini-pro' which is the standard stable model.
+        // DO NOT use 'gemini-1.5-flash' until you verify access.
+        // ---------------------------------------------------------
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
         let systemInstruction = "";
         if (context === "fix") {
-            systemInstruction = "You are an expert code debugger. Fix the errors in the code provided.";
+            systemInstruction = "You are an expert code debugger. Fix the errors in the code provided. Return ONLY the fixed code. Do not wrap in markdown if possible.";
         } else if (context === "review") {
-            systemInstruction = "You are a code reviewer. Review the code quality and security.";
+            systemInstruction = "You are a code reviewer. Review the code quality and security. Keep it brief.";
         } else {
-            systemInstruction = "You are a coding assistant. Generate code based on the prompt.";
+            systemInstruction = "You are a coding assistant. Generate code based on the prompt. Return ONLY the code.";
         }
 
-        const fullPrompt = `${systemInstruction}\nUser Prompt: ${prompt}\nCode:\`\`\`${code || ""}\`\`\``;
+        const fullPrompt = `${systemInstruction}\nUser Prompt: ${prompt}\nCode:\n${code || ""}`;
         
         const result = await model.generateContent(fullPrompt);
-        res.json({ result: result.response.text() });
+        const response = await result.response;
+        const text = response.text();
+        
+        res.json({ result: text });
     } catch (error) {
-        console.error("Gemini AI Error:", error);
-        res.status(500).json({ msg: "AI Service Failed" });
+        console.error("Gemini AI Error:", error.message);
+        
+        // Return a cleaner error message to the frontend
+        res.status(500).json({ 
+            result: `AI Service Error: ${error.message.includes('404') ? 'Model not found (Check API Key/Model Name)' : error.message}` 
+        });
     }
 };
