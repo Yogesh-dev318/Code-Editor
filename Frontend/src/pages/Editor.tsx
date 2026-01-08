@@ -89,7 +89,10 @@ export const EditorPage = () => {
     useEffect(() => {
         if (projectId) {
             fetchFiles(projectId);
-            const newSocket = io('http://localhost:3000');
+            const newSocket = io('/', { // Connects to the same domain
+                transports: ['websocket'], 
+                withCredentials: true 
+            });
             setSocket(newSocket);
             newSocket.emit('join-project', projectId);
 
