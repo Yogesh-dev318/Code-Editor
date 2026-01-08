@@ -1,0 +1,23 @@
+{
+  "name": "code-editor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+     "start":"npm run start --prefix backend",
+    "build":"npm install --prefix backend && npm install --prefix Frontend && npm run build --prefix Frontend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yogesh-dev318/Code-Editor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Yogesh-dev318/Code-Editor/issues"
+  },
+  "homepage": "https://github.com/Yogesh-dev318/Code-Editor#readme"
+}

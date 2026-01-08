@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
 const connectDB = require('./config/db');
 const cors = require('cors');
 require('dotenv').config();
@@ -12,7 +13,9 @@ const server = http.createServer(app);
 connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+     origin: 'http://localhost:5173'
+}));
 app.use(express.json());
 
 // Routes
@@ -32,7 +35,29 @@ const getRoomCount = (roomId) => {
     const room = io.sockets.adapter.rooms.get(roomId);
     return room ? room.size : 0;
 };
-
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    const statusCode = err.statusCode || 500;
+    const message = err.message || 'Something went wrong on the server!';
+  
+    res.status(statusCode).json({
+      message: message,
+      stack: process.env.NODE_ENV === 'production' ? null : err.stack,
+    });
+  });
+  
+  if (process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "../Frontend/dist")));
+  
+    // Catch-all handler: send back React's index.html file for any non-API routes
+    app.use((req, res, next) => {
+      if (req.method === 'GET' && !req.path.startsWith('/api')) {
+        res.sendFile(path.join(__dirname, "../Frontend", "dist", "index.html"));
+      } else {
+        next();
+      }
+    });
+  }
 io.on('connection', (socket) => {
     console.log(`User Connected: ${socket.id}`);
 

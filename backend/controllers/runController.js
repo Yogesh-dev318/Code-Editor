@@ -29,7 +29,7 @@ exports.runCode = async (req, res) => {
     }
 
     try {
-        const response = await axios.post('https://emkc.org/api/v2/piston/execute', {
+        const response = await axios.post(process.env.PISTON_API_KEY, {
             language: config.language,
             version: config.version,
             files: finalFiles,
