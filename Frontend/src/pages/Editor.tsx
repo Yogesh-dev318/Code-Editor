@@ -10,11 +10,7 @@ import { Button } from '../components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import { Textarea } from '../components/ui/textarea';
 import { 
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "../components/ui/select";
 import { 
     File, Plus, Trash2, Play, Bot, Loader2, Code2, 
@@ -32,8 +28,6 @@ export const EditorPage = () => {
     const [output, setOutput] = useState("");
     const [isRunning, setIsRunning] = useState(false);
     const [language, setLanguage] = useState("javascript");
-    
-    // NEW: Input Management
     const [stdin, setStdin] = useState(""); 
     const [activeTab, setActiveTab] = useState<'output' | 'input'>('output');
 
@@ -59,19 +53,50 @@ export const EditorPage = () => {
         }
     }, [activeFile]);
 
-    // Socket Setup
+    // --- SOCKET & SYNC LOGIC ---
     useEffect(() => {
         if (projectId) {
+            // Initial Fetch
             fetchFiles(projectId);
+            
             const newSocket = io('http://localhost:3000');
             setSocket(newSocket);
+            
             newSocket.emit('join-project', projectId);
+
+            // 1. Listen for Code Updates (Typing)
             newSocket.on('code-update', ({ fileId, content }) => {
                 updateFileContent(fileId, content);
             });
+
+            // 2. Listen for File Structure Updates (New/Delete File)
+            newSocket.on('refresh-files', () => {
+                console.log("Someone changed the files. Refreshing...");
+                fetchFiles(projectId); // Re-fetch the file list from DB
+            });
+
             return () => { newSocket.disconnect(); };
         }
     }, [projectId]);
+
+    // --- HANDLERS FOR FILE CREATION / DELETION ---
+    
+    const handleCreateFile = async () => {
+        const name = prompt("File Name (e.g., main.py)?");
+        if (name && projectId) {
+            await createFile(name, projectId);
+            // Notify others
+            socket?.emit('project-structure-updated', { projectId });
+        }
+    };
+
+    const handleDeleteFile = async (fileId: string) => {
+        if (confirm("Are you sure you want to delete this file?")) {
+            await deleteFile(fileId);
+            // Notify others
+            socket?.emit('project-structure-updated', { projectId });
+        }
+    };
 
     const handleEditorDidMount: OnMount = (editor) => {
         editorRef.current = editor;
@@ -94,21 +119,19 @@ export const EditorPage = () => {
         }
     };
 
-    // Run Code with Input
+    // Run Code
     const runCode = async () => {
         if (!activeFile) return;
-
         setIsRunning(true);
-        setActiveTab('output'); // Auto switch to output tab to see result
+        setActiveTab('output'); 
         setOutput("Running selected file via Piston API...");
 
         try {
             const singleFilePayload = [{ name: activeFile.name, content: activeFile.content }];
-
             const res = await api.post('/run', { 
                 language: language,
                 files: singleFilePayload,
-                stdin: stdin // SEND INPUT TO BACKEND
+                stdin: stdin 
             });
             setOutput(res.data.output);
         } catch (err: any) {
@@ -136,13 +159,20 @@ export const EditorPage = () => {
             <div className="w-64 flex flex-col border-r border-border bg-muted/20">
                 <div className="p-4 border-b border-border flex items-center justify-between">
                     <span className="font-semibold text-sm flex items-center gap-2"><Code2 className="h-4 w-4" /> Explorer</span>
-                    <Button variant="ghost" size="icon" onClick={() => { const name = prompt("File Name?"); if(name && projectId) createFile(name, projectId); }}><Plus className="h-4 w-4" /></Button>
+                    {/* USE NEW HANDLER */}
+                    <Button variant="ghost" size="icon" onClick={handleCreateFile}>
+                        <Plus className="h-4 w-4" />
+                    </Button>
                 </div>
                 <div className="flex-1 overflow-y-auto p-2 space-y-1">
                     {files.map(f => (
                         <div key={f._id} onClick={() => setActiveFile(f)} className={`group flex items-center justify-between px-3 py-2 rounded-md text-sm cursor-pointer transition-colors ${activeFile?._id === f._id ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}>
                             <span className="flex items-center gap-2 truncate"><File className="h-4 w-4" /> {f.name}</span>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 hover:text-destructive" onClick={(e) => { e.stopPropagation(); deleteFile(f._id); }}><Trash2 className="h-3 w-3" /></Button>
+                            {/* USE NEW HANDLER */}
+                            <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 hover:text-destructive" 
+                                onClick={(e) => { e.stopPropagation(); handleDeleteFile(f._id); }}>
+                                <Trash2 className="h-3 w-3" />
+                            </Button>
                         </div>
                     ))}
                 </div>
@@ -187,35 +217,15 @@ export const EditorPage = () => {
 
                     {/* RIGHT PANEL: OUTPUT & INPUT */}
                     <div className="w-[35%] border-l border-border bg-zinc-950 flex flex-col">
-                        {/* Panel Tabs */}
                         <div className="flex border-b border-zinc-800 bg-zinc-900">
-                            <button 
-                                onClick={() => setActiveTab('output')}
-                                className={`flex-1 p-3 text-xs font-mono uppercase flex items-center justify-center gap-2 hover:bg-zinc-800 transition-colors ${activeTab === 'output' ? 'text-white border-b-2 border-primary bg-zinc-900' : 'text-zinc-500'}`}
-                            >
-                                <TerminalSquare className="h-4 w-4" /> Output
-                            </button>
-                            <button 
-                                onClick={() => setActiveTab('input')}
-                                className={`flex-1 p-3 text-xs font-mono uppercase flex items-center justify-center gap-2 hover:bg-zinc-800 transition-colors ${activeTab === 'input' ? 'text-white border-b-2 border-primary bg-zinc-900' : 'text-zinc-500'}`}
-                            >
-                                <ArrowRightFromLine className="h-4 w-4" /> Input
-                            </button>
+                            <button onClick={() => setActiveTab('output')} className={`flex-1 p-3 text-xs font-mono uppercase flex items-center justify-center gap-2 hover:bg-zinc-800 transition-colors ${activeTab === 'output' ? 'text-white border-b-2 border-primary bg-zinc-900' : 'text-zinc-500'}`}><TerminalSquare className="h-4 w-4" /> Output</button>
+                            <button onClick={() => setActiveTab('input')} className={`flex-1 p-3 text-xs font-mono uppercase flex items-center justify-center gap-2 hover:bg-zinc-800 transition-colors ${activeTab === 'input' ? 'text-white border-b-2 border-primary bg-zinc-900' : 'text-zinc-500'}`}><ArrowRightFromLine className="h-4 w-4" /> Input</button>
                         </div>
-
-                        {/* Panel Content */}
                         <div className="flex-1 overflow-hidden relative">
                             {activeTab === 'output' ? (
-                                <div className="h-full p-4 font-mono text-sm whitespace-pre-wrap text-zinc-300 overflow-y-auto">
-                                    {output || <span className="text-zinc-600 italic">No output yet...</span>}
-                                </div>
+                                <div className="h-full p-4 font-mono text-sm whitespace-pre-wrap text-zinc-300 overflow-y-auto">{output || <span className="text-zinc-600 italic">No output yet...</span>}</div>
                             ) : (
-                                <Textarea 
-                                    className="h-full w-full bg-zinc-950 text-zinc-300 font-mono border-none focus-visible:ring-0 p-4 resize-none"
-                                    placeholder="Enter your program input here (stdin)..."
-                                    value={stdin}
-                                    onChange={(e) => setStdin(e.target.value)}
-                                />
+                                <Textarea className="h-full w-full bg-zinc-950 text-zinc-300 font-mono border-none focus-visible:ring-0 p-4 resize-none" placeholder="Enter your program input here (stdin)..." value={stdin} onChange={(e) => setStdin(e.target.value)} />
                             )}
                         </div>
                     </div>

@@ -40,6 +40,9 @@ io.on('connection', (socket) => {
     socket.on('code-change', ({ projectId, fileId, content }) => {
         socket.to(projectId).emit('code-update', { fileId, content });
     });
+    socket.on('project-structure-updated', ({ projectId }) => {
+        socket.to(projectId).emit('refresh-files');
+    });
 
     socket.on('disconnect', () => {
         console.log('User Disconnected');
