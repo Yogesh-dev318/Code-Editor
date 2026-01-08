@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { Button } from '../components/ui/button';
 import { Code2, LogOut, LayoutDashboard } from 'lucide-react';
@@ -6,6 +6,7 @@ import { Code2, LogOut, LayoutDashboard } from 'lucide-react';
 export const Navbar = () => {
     const { isAuthenticated, logout, user } = useAuthStore();
     const navigate = useNavigate();
+    const location = useLocation(); // Hook to get current path
 
     const handleLogout = () => {
         logout();
@@ -34,11 +35,16 @@ export const Navbar = () => {
                                 <span className="text-sm text-neutral-400 hidden sm:inline-block">
                                     Hi, {user?.username}
                                 </span>
-                                <Link to="/dashboard">
-                                    <Button size="sm" variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 border-0 text-white backdrop-blur-sm">
-                                        <LayoutDashboard className="h-4 w-4" /> Dashboard
-                                    </Button>
-                                </Link>
+                                
+                                {/* HIDE DASHBOARD BUTTON IF ALREADY ON DASHBOARD */}
+                                {location.pathname !== '/dashboard' && (
+                                    <Link to="/dashboard">
+                                        <Button size="sm" variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 border-0 text-white backdrop-blur-sm">
+                                            <LayoutDashboard className="h-4 w-4" /> Dashboard
+                                        </Button>
+                                    </Link>
+                                )}
+
                                 <Button size="sm" variant="ghost" onClick={handleLogout} className="text-red-400 hover:text-red-300 hover:bg-red-500/10">
                                     <LogOut className="h-4 w-4" />
                                 </Button>

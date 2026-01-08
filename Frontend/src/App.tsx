@@ -4,6 +4,7 @@ import { Login, Signup } from './pages/Auth';
 import { Dashboard } from './pages/Dashboard';
 import { EditorPage } from './pages/Editor';
 import { Home } from './pages/Home';
+import { Toaster } from 'sonner';
 
 // Wrapper for pages that require login
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -59,6 +60,7 @@ export default function App() {
                     } 
                 />
             </Routes>
+            <Toaster position="bottom-right" theme="dark" /> 
         </BrowserRouter>
     );
 }
