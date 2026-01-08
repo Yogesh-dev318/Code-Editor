@@ -550,7 +550,7 @@ export const EditorPage = () => {
                 <DialogContent className="sm:max-w-md bg-neutral-900 border-neutral-800 text-white shadow-2xl">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-purple-400">
-                            <Bot className="h-5 w-5" /> Gemini AI Assistant
+                            <Bot className="h-5 w-5" />AI Assistant
                         </DialogTitle>
                     </DialogHeader>
 
