@@ -6,13 +6,11 @@ import { EditorPage } from './pages/Editor';
 import { Home } from './pages/Home';
 import { Toaster } from 'sonner';
 
-// Wrapper for pages that require login
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const isAuthenticated = useAuthStore(state => state.isAuthenticated);
     return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
-// Wrapper for pages that should NOT be accessible if already logged in
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
     const isAuthenticated = useAuthStore(state => state.isAuthenticated);
     return isAuthenticated ? <Navigate to="/dashboard" /> : children;
@@ -24,7 +22,6 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<Home />} />
                 
-                {/* Wrap Login & Signup with PublicRoute */}
                 <Route 
                     path="/login" 
                     element={

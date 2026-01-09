@@ -49,10 +49,10 @@ git clone https://github.com/Yogesh-dev318/Code-Editor.git
 cd code-editor
 npm run build
 npm start
-
+```
 
 # Enviroment Vaiables
-```
+```bash
 PORT=300
 MONGO_URI=mongodb+srv://user:password@cluster1000.m.mongodb.net
 JWT_SECRET=Your Secret

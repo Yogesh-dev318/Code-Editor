@@ -9,14 +9,13 @@ interface AuthState {
     logout: () => void;
 }
 
-// 1. Check LocalStorage BEFORE creating the store
 const storedUser = localStorage.getItem('user');
 const storedToken = localStorage.getItem('token');
 
 export const useAuthStore = create<AuthState>((set) => ({
-    // 2. Initialize state with stored values immediately
+   
     user: storedUser ? JSON.parse(storedUser) : null,
-    isAuthenticated: !!storedToken, // True if token exists
+    isAuthenticated: !!storedToken, 
 
     loginAction: async (email, password) => {
         try {

@@ -5,10 +5,6 @@ exports.getAiAssistance = async (req, res) => {
     const { code, prompt, context } = req.body; 
 
     try {
-        // ---------------------------------------------------------
-        // FIX: Use 'gemini-pro' which is the standard stable model.
-        // DO NOT use 'gemini-1.5-flash' until you verify access.
-        // ---------------------------------------------------------
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
         let systemInstruction = "";
@@ -29,8 +25,6 @@ exports.getAiAssistance = async (req, res) => {
         res.json({ result: text });
     } catch (error) {
         console.error("Gemini AI Error:", error.message);
-        
-        // Return a cleaner error message to the frontend
         res.status(500).json({ 
             result: `AI Service Error: ${error.message.includes('404') ? 'Model not found (Check API Key/Model Name)' : error.message}` 
         });

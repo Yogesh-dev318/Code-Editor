@@ -67,7 +67,6 @@ export const Dashboard = () => {
     };
 
     return (
-        // Ensure this container is relative and overflows are hidden for the stars
         <div className="min-h-screen bg-neutral-950 text-white selection:bg-blue-500/30 relative overflow-hidden">
             
             {/* BACKGROUND ELEMENTS (z-0) */}

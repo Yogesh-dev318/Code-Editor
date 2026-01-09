@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 import { ShootingStars } from '../components/ui/shooting-stars';
 import { StarsBackground } from '../components/ui/stars-background';
 
-// Shared classes for consistent styling
 const inputClasses = "h-11 bg-neutral-950 border-neutral-800 text-neutral-100 placeholder:text-neutral-600 focus-visible:ring-2 focus-visible:ring-indigo-500/50 focus-visible:border-indigo-500 transition-all duration-200";
 const labelClasses = "block text-xs font-medium text-neutral-400 uppercase tracking-wider mb-1.5 ml-1";
 

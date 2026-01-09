@@ -5,7 +5,7 @@ interface ProjectState {
     projects: any[];
     fetchProjects: () => Promise<void>;
     addProject: (name: string) => Promise<void>;
-    joinProject: (projectId: string) => Promise<void>; // Add this definition
+    joinProject: (projectId: string) => Promise<void>; 
     deleteProject: (id: string) => Promise<void>;
 }
 
@@ -26,14 +26,13 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
         } catch (err) { console.error("Create failed", err); }
     },
 
-    // --- ADD THIS ACTION ---
     joinProject: async (projectId) => {
         try {
             await api.post('/projects/join', { projectId });
-            get().fetchProjects(); // Refresh list to show the new project
+            get().fetchProjects(); 
         } catch (err: any) {
             console.error("Join failed", err);
-            throw err; // Throw so UI can handle alerts
+            throw err; 
         }
     },
 

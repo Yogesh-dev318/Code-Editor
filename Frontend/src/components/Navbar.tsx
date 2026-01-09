@@ -6,7 +6,7 @@ import { Code2, LogOut, LayoutDashboard } from 'lucide-react';
 export const Navbar = () => {
     const { isAuthenticated, logout, user } = useAuthStore();
     const navigate = useNavigate();
-    const location = useLocation(); // Hook to get current path
+    const location = useLocation();
 
     const handleLogout = () => {
         logout();
@@ -18,7 +18,6 @@ export const Navbar = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     
-                    {/* LOGO */}
                     <Link to="/" className="flex items-center gap-2 group">
                         <div className="p-1.5 rounded-lg group-hover:bg-blue-500/10 transition-colors">
                             <Code2 className="h-6 w-6 text-blue-500" />
@@ -28,7 +27,7 @@ export const Navbar = () => {
                         </span>
                     </Link>
 
-                    {/* RIGHT SIDE ACTIONS */}
+                 
                     <div className="flex items-center gap-4">
                         {isAuthenticated ? (
                             <>
@@ -36,7 +35,6 @@ export const Navbar = () => {
                                     Hi, {user?.username}
                                 </span>
                                 
-                                {/* HIDE DASHBOARD BUTTON IF ALREADY ON DASHBOARD */}
                                 {location.pathname !== '/dashboard' && (
                                     <Link to="/dashboard">
                                         <Button size="sm" variant="secondary" className="gap-2 bg-white/10 hover:bg-white/20 border-0 text-white backdrop-blur-sm">

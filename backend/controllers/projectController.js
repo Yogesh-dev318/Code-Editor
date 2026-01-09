@@ -93,7 +93,6 @@ exports.joinProject = async (req, res) => {
     try {
         const { projectId } = req.body;
         
-        // validate format of ID to prevent server crash
         if (!projectId.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(400).json({ msg: 'Invalid Project ID format' });
         }
@@ -101,12 +100,9 @@ exports.joinProject = async (req, res) => {
         const project = await Project.findById(projectId);
         if (!project) return res.status(404).json({ msg: 'Project not found' });
 
-        // Check if user is already a collaborator (or owner)
         if (project.owner.toString() === req.user.id || project.collaborators.includes(req.user.id)) {
-            return res.json(project); // Already joined, just return it
+            return res.json(project); 
         }
-
-        // Add user to collaborators
         project.collaborators.push(req.user.id);
         await project.save();
         

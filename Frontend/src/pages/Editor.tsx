@@ -5,8 +5,6 @@ import Editor, { type OnMount } from '@monaco-editor/react';
 import { useFileStore } from '../store/useFileStore';
 import api from '../api/axios';
 import { cn } from "../lib/utils";
-
-// UI Components
 import { Button } from '../components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../components/ui/dialog';
 import { Input } from '../components/ui/input';
@@ -28,36 +26,26 @@ export const EditorPage = () => {
     const { 
         files, activeFile, fetchFiles, createFile, deleteFile, setActiveFile, updateFileContent 
     } = useFileStore();
-
-    // Local State
     const [socket, setSocket] = useState<Socket | null>(null);
     const [output, setOutput] = useState("");
     const [isRunning, setIsRunning] = useState(false);
     const [language, setLanguage] = useState("javascript");
     const [stdin, setStdin] = useState(""); 
     const [activeTab, setActiveTab] = useState<'output' | 'input'>('output');
-
-    // UI State
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    // Default to 1 (yourself)
     const [onlineUsers, setOnlineUsers] = useState(1);
-
-    // Save & AI State
     const [saveStatus, setSaveStatus] = useState<"Saved" | "Saving..." | "Error">("Saved");
     const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [aiPrompt, setAiPrompt] = useState("");
     const [isAiOpen, setIsAiOpen] = useState(false);
     const [isAiLoading, setIsAiLoading] = useState(false);
     
-    // AI Rate Limit State
     const [usageCount, setUsageCount] = useState(0);
     const [rateLimitTimer, setRateLimitTimer] = useState(0);
     const [aiMode, setAiMode] = useState<'menu' | 'fix' | 'review' | 'generate'>('menu');
     
-    // Constants
     const MAX_REQUESTS_PER_MINUTE = 3;
 
-    // Dialog States
     const [isCreateFileOpen, setIsCreateFileOpen] = useState(false);
     const [newFileName, setNewFileName] = useState("");
     const [isDeleteFileOpen, setIsDeleteFileOpen] = useState(false);
@@ -65,7 +53,6 @@ export const EditorPage = () => {
 
     const editorRef = useRef<any>(null);
 
-    // 1. Language Detection & Mobile Init
     useEffect(() => {
         if (activeFile) {
             if (activeFile.name.endsWith('.py')) setLanguage('python');
@@ -85,21 +72,19 @@ export const EditorPage = () => {
         }
     }, []);
 
-    // 2. Socket Connection & Sync
     useEffect(() => {
         if (projectId) {
             fetchFiles(projectId);
-            const newSocket = io('/', { // Connects to the same domain
+            const newSocket = io('/', { 
                 transports: ['websocket'], 
                 withCredentials: true 
             });
             setSocket(newSocket);
             newSocket.emit('join-project', projectId);
 
-            // Listen for user count updates
             newSocket.on('user-count', (count: number) => {
-                console.log("Online users update:", count); // Debug log
-                setOnlineUsers(Math.max(1, count)); // Ensure it never shows 0
+                console.log("Online users update:", count); 
+                setOnlineUsers(Math.max(1, count)); 
             });
 
             newSocket.on('code-update', ({ fileId, content }) => {
@@ -114,7 +99,6 @@ export const EditorPage = () => {
         }
     }, [projectId]);
 
-    // --- RATE LIMIT TIMER EFFECT ---
     useEffect(() => {
         let interval: ReturnType<typeof setInterval>;
         if (rateLimitTimer > 0) {
@@ -122,13 +106,12 @@ export const EditorPage = () => {
                 setRateLimitTimer((prev) => prev - 1);
             }, 1000);
         } else if (rateLimitTimer === 0 && usageCount >= MAX_REQUESTS_PER_MINUTE) {
-            // Reset usage count after timer finishes
+           
             setUsageCount(0);
         }
         return () => clearInterval(interval);
     }, [rateLimitTimer, usageCount]);
 
-    // --- HANDLERS ---
     const handleCreateSubmit = async () => {
         if (!newFileName) return;
         const allowedExtensions = ['.js', '.ts', '.py', '.java', '.c', '.cpp', '.rs'];
@@ -206,7 +189,7 @@ export const EditorPage = () => {
     };
 
     const handleAi = async (context: 'fix' | 'review' | 'generate') => {
-        // Rate Limit Check
+       
         if (rateLimitTimer > 0) {
             toast.error(`Please wait ${rateLimitTimer}s before using AI again.`);
             return;
@@ -214,14 +197,14 @@ export const EditorPage = () => {
 
         setIsAiLoading(true);
         try {
-            // 1. Prepare Prompt with File Extension Context
+      
             let promptToSend = aiPrompt;
             const fileExtension = activeFile?.name.split('.').pop() || 'js'; // Default to js if unknown
             
             if (context === 'fix') {
                 promptToSend = `(File context: .${fileExtension}) \n\n ${output || "Please find and fix errors in this code."}`; 
             } else if (context === 'generate') {
-                 // Append extension info for generation
+                 
                  promptToSend = `${aiPrompt} \n\n (Important: Generate code strictly for a .${fileExtension} file)`;
             }
 
@@ -246,7 +229,6 @@ export const EditorPage = () => {
             setAiPrompt("");
             setAiMode('menu'); 
 
-            // Increment Usage & Trigger Cooldown if needed
             const newCount = usageCount + 1;
             setUsageCount(newCount);
             if (newCount >= MAX_REQUESTS_PER_MINUTE) {
@@ -260,7 +242,6 @@ export const EditorPage = () => {
         }
     };
 
-    // Reset AI mode when dialog opens
     useEffect(() => {
         if (isAiOpen) setAiMode('menu');
     }, [isAiOpen]);
