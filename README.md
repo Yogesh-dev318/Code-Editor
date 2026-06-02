@@ -3,6 +3,10 @@
 **CodeCraft** is a powerful, real-time collaborative code editor built for developers. It features a modern, dark-themed UI, multi-language support, real-time file synchronization, and an integrated AI assistant powered by Google Gemini.
 
 ---
+##Video:-
+https://github.com/user-attachments/assets/be37df23-77b2-4832-8626-c3a48d3d6af0
+
+
 
 ## ✨ Features
 
