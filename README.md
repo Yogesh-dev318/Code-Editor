@@ -4,11 +4,9 @@
 
 ---
 ##Video:-
-<video
-  src="https://github.com/user-attachments/assets/be37df23-77b2-4832-8626-c3a48d3d6af0"
-  controls
-  width="100%"
-></video>
+https://github.com/user-attachments/assets/b44192ea-dc61-4641-94b9-a2d8a0cb8faf
+
+
 
 
 ## ✨ Features
